@@ -15,7 +15,8 @@ const MIME_TYPES = {
     },
     filename: (req, file, callback) => {
       //permet de générer un nouveau nom pour les images (évite doublon)
-      const name = file.originalname.split(' ').join('_');
+      const originalName = file.originalname.split('.')[0];
+      const name= originalName.split(' ').join('_')
       const extension = MIME_TYPES[file.mimetype];
       callback(null, name + Date.now() + '.' + extension);
     }
