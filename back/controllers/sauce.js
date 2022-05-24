@@ -53,18 +53,12 @@ exports.createSauce = (req, res, next) => {
         const filename = sauce.imageUrl.split('/images/')[1];
         
         const newBody=  updateBody(req)
+        
 
         Sauce.findByIdAndUpdate( req.params.id, newBody )
-        .then(res.status(201).json({ message : "Sauce modifiée"}))
-        .then(fs.unlink(`images/${filename}`,(err => {
-          if (err) console.log(err);
-          else {
-            console.log("image supprimée")
-          }
-          })))
-        .catch(error => res.status(400).json({ error }))
-        
-        
+          .then(res.status(201).json({ message : "Sauce modifiée"}))
+          .then(deleteOldImage(req,filename))
+        .catch(error => res.status(400).json({ error })) 
       })
       .catch(error => res.status(404).json({ error }))
   }
@@ -76,5 +70,14 @@ exports.createSauce = (req, res, next) => {
     modifyBody.imageUrl = req.protocol+"://"+req.headers.host +"/images/"+req.file.filename
   
     return modifyBody
+  }
+  function deleteOldImage(req,filename){
+    if (req.file ==undefined) return
+    fs.unlink(`images/${filename}`,(err => {
+      if (err) console.log(err);
+      else {
+        console.log("image supprimée")
+      }
+    }))
   }
   
