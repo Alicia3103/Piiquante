@@ -20,22 +20,22 @@ exports.createSauce = (req, res, next) => {
       mainPepper: sauceObject.mainPepper,
       imageUrl: req.protocol+"://"+req.headers.host +"/images/"+req.file.filename,
       heat: sauceObject.heat,
-      likes: 2,
-      dislikes: 2,
-      usersLiked: ["pouet"] ,
-      usersDisliked: ["pouet"] ,
+      likes: 0,
+      dislikes: 0,
+      usersLiked: [] ,
+      usersDisliked: [] ,
     })
     sauce.save()
     .then(() => res.status(201).json({message:"Sauce enregistrée"}))
     .catch(error => res.status(400).json({error}))
   };
-  exports.getOneSauce= (req, res, next) =>{
+exports.getOneSauce= (req, res, next) =>{
     Sauce.findById( req.params.id )
     .then(sauce => res.status(200).json(sauce))
     .catch(error => res.status(404).json({ error }))
   }
 
-  exports.deleteSauce = (req, res, next) => {
+exports.deleteSauce = (req, res, next) => {
     Sauce.findById(req.params.id)
       .then(sauce => {
         const filename = sauce.imageUrl.split('/images/')[1];
@@ -47,7 +47,7 @@ exports.createSauce = (req, res, next) => {
       })
       .catch(error => res.status(500).json({ error }));
   };
-  exports.modifySauce =(req, res, next) => {
+exports.modifySauce =(req, res, next) => {
     Sauce.findById(req.params.id)
       .then(sauce => {
         const filename = sauce.imageUrl.split('/images/')[1];
@@ -58,12 +58,12 @@ exports.createSauce = (req, res, next) => {
         Sauce.findByIdAndUpdate( req.params.id, newBody )
           .then(res.status(201).json({ message : "Sauce modifiée"}))
           .then(deleteOldImage(req,filename))
-        .catch(error => res.status(400).json({ error })) 
+          .catch(error => res.status(400).json({ error })) 
       })
       .catch(error => res.status(404).json({ error }))
   }
 
-  function updateBody(req){
+function updateBody(req){
     if (req.file ==undefined) return req.body
     
     const modifyBody = JSON.parse(req.body.sauce)
@@ -71,7 +71,7 @@ exports.createSauce = (req, res, next) => {
   
     return modifyBody
   }
-  function deleteOldImage(req,filename){
+function deleteOldImage(req,filename){
     if (req.file ==undefined) return
     fs.unlink(`images/${filename}`,(err => {
       if (err) console.log(err);
@@ -80,4 +80,45 @@ exports.createSauce = (req, res, next) => {
       }
     }))
   }
+
+exports.likeSauce =(req, res, next) => {
+  Sauce.findById(req.params.id)
+  .then((sauce)=>{
+    let like = req.body.like
+    let userId = req.body.userId
+    switch (like){
+      case 1:
+        sauce.usersLiked.push(userId)
+        sauce.likes++
+        sauce.save()
+        .then(res.status(201).json({ message : "vous avez liké cette sauce"}))
+        .catch(error => res.status(400).json({ error }))
+        break
+      case -1:
+        sauce.usersDisliked.push(userId)
+        sauce.dislikes++
+        sauce.save()
+        .then(res.status(201).json({ message : "vous avez disliké cette sauce"}))
+        .catch(error => res.status(400).json({ error }))
+        break
+      case 0:
+        if(sauce.usersLiked.includes(userId)){
+          sauce.usersLiked.splice(sauce.usersLiked.indexOf(req.body.userId), 1)
+        sauce.likes--
+        sauce.save()
+        .then(res.status(201).json({ message : "votre like a été enlevé"}))
+        .catch(error => res.status(400).json({ error }))
+        }
+        else if(sauce.usersDisliked.includes(userId)){
+          sauce.usersDisliked.splice(sauce.usersDisliked.indexOf(req.body.userId), 1)
+          sauce.dislikes--
+          sauce.save()
+          .then(res.status(201).json({ message : "votre dislike a été enlevé"}))
+          .catch(error => res.status(400).json({ error }))
+          }
+        break
+    }
+  })
+  .catch(error => res.status(404).json({error}))
+}
   
