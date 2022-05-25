@@ -7,9 +7,12 @@ dotenv.config();
 const secretToken = process.env.SECRET_TOKEN
 
 const jwt = require('jsonwebtoken')
+
+
+
 exports.signup = (req, res, next) =>  {
 const email= req.body.email
-
+//hash du MDP
 bcrypt.hash(req.body.password, 10)
     .then(hash => {
     const user =new User({email, password:hash})
@@ -20,6 +23,7 @@ bcrypt.hash(req.body.password, 10)
     })
 
 }
+
 exports.login = (req, res, next) => {
     //méthode 'findOne' pour trouver 1 seul utilisateur
     User.findOne({
@@ -29,20 +33,14 @@ exports.login = (req, res, next) => {
       // fonction asyncrone donc Promise
       .then(user => {
         if (!user) {
-          return res.status(401).json({
-            error: 'Utilisateur non trouvé !'
-            //réponse d'erreur avec code 401
-          });
+          return res.status(401).json({message: 'Utilisateur non trouvé !'});
         }
         //comparaison entre le mdp tapé et celui de la base de donnée
         bcrypt.compare(req.body.password, user.password)
           .then(valid => {
             //verification si le mdp est valable ou pas
             if (!valid) {
-              return res.status(401).json({
-                error: 'Mot de passe incorrect !'
-                //réponse d'erreur avec code 401
-              });
+              return res.status(401).json({message: 'Mot de passe incorrect !'});
             }
             
             res.status(200).json({
@@ -51,13 +49,7 @@ exports.login = (req, res, next) => {
               token: jwt.sign({userId: user._id}, secretToken,{expiresIn: '24h'})
             });
           })
-          .catch(error => res.status(500).json({
-            error
-            //réponse d'erreur avec code 500
-          }));
+          .catch(error => res.status(500).json({error}));
       })
-      .catch(error => res.status(500).json({
-        error
-        //réponse d'erreur avec code 500
-      }));
+      .catch(error => res.status(500).json({error}));
   };

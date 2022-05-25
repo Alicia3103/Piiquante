@@ -10,8 +10,6 @@ exports.getAllSauce = (req, res, next) => {
 
 exports.createSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce)
-    console.log(sauceObject)
-    console.log(req.file)
     const sauce= new Sauce({
       userId: sauceObject.userId,
       name:sauceObject.name,
@@ -38,10 +36,17 @@ exports.getOneSauce= (req, res, next) =>{
 exports.deleteSauce = (req, res, next) => {
     Sauce.findById(req.params.id)
       .then(sauce => {
+
+        if (!sauce) {
+          res.status(404).json({message:"Aucune sauce trouvée"});
+        }
+        if (sauce.userId !== req.auth.userId) {
+          res.status(403).json({message: "Utilisateur non autorisé"});
+        }
         const filename = sauce.imageUrl.split('/images/')[1];
         fs.unlink(`images/${filename}`, () => {
           Sauce.deleteOne({ _id: req.params.id })
-            .then(() => res.status(200).json({ message: 'Objet supprimé !'}))
+            .then(() => res.status(200).json({ message: "Objet supprimé !"}))
             .catch(error => res.status(400).json({ error }));
         });
       })
