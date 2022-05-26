@@ -72,7 +72,7 @@ function updateBody(req){
     if (req.file ==undefined) return req.body
     
     const modifyBody = JSON.parse(req.body.sauce)
-    modifyBody.imageUrl = req.protocol+"://"+req.headers.host +"/images/"+req.file.filename
+    modifyBody.imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
   
     return modifyBody
   }

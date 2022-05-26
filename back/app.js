@@ -1,4 +1,7 @@
 const express = require("express");
+const rateLimit = require('express-rate-limit')
+const helmet = require("helmet");
+const path = require('path');
 const app = express();
 const mongoose = require('mongoose');
 const dotenv = require("dotenv");
@@ -7,7 +10,7 @@ const user=process.env.DB_USER;
 const password=process.env.DB_PASSWORD
 
 
-const path = require('path');
+
 const userRoutes = require('./routes/user');
 const sauceRoutes = require('./routes/sauce');
 
@@ -30,8 +33,24 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   next();
 });
+// rate limiter
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 70, // Limite a 70 requet sur 15min
+	standardHeaders: true, // Retourne le rate limit dans le header `RateLimit-*` headers
+	legacyHeaders: false, // désactive le `X-RateLimit-*` des headers
+})
 
 //middleware
+app.use(limiter)
+
+app.use(
+  helmet({
+    crossOriginResourcePolicy:false,
+    crossOriginOpenerPolicy:false,
+  })
+)
+
 app.use(express.json());
 app.use('/images', express.static(path.join(__dirname, 'images')))
 
