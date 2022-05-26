@@ -1,18 +1,21 @@
 
-
+//import du Model
 const {User}=require("../models/User")
+
+//import des modules de node
 const bcrypt= require("bcrypt")
 const dotenv = require("dotenv");
 dotenv.config();
-const secretToken = process.env.SECRET_TOKEN
-
 const jwt = require('jsonwebtoken')
 
+//variable d'environnement
+const secretToken = process.env.SECRET_TOKEN
 
+//fonction sign Up
 
 exports.signup = (req, res, next) =>  {
 const email= req.body.email
-//hash du MDP
+//hash et sallage du MDP grace a Bcrypt
 bcrypt.hash(req.body.password, 10)
     .then(hash => {
     const user =new User({email, password:hash})
@@ -24,6 +27,7 @@ bcrypt.hash(req.body.password, 10)
 
 }
 
+//fonction login
 exports.login = (req, res, next) => {
     //méthode 'findOne' pour trouver 1 seul utilisateur
     User.findOne({

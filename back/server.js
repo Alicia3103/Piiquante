@@ -1,8 +1,15 @@
+
+//appels des différents packages node 
 const http = require('http');
 const app = require('./app');
 const dotenv = require("dotenv");
 dotenv.config();
+
+//appel des variables d'environnement
 const MY_PORT = process.env.PORT;
+
+
+//Normalize du port
 
 const normalizePort = val => {
   const port = parseInt(val, 10);
@@ -38,6 +45,7 @@ const errorHandler = error => {
   }
 };
 
+// création du server
 const server = http.createServer(app);
 
 server.on('error', errorHandler);

@@ -1,3 +1,5 @@
+
+//appels des différents packages node 
 const express = require("express");
 const rateLimit = require('express-rate-limit')
 const helmet = require("helmet");
@@ -6,11 +8,13 @@ const app = express();
 const mongoose = require('mongoose');
 const dotenv = require("dotenv");
 dotenv.config();
+
+//appel des variables d'environnement
 const user=process.env.DB_USER;
 const password=process.env.DB_PASSWORD
 
 
-
+//définition des routes
 const userRoutes = require('./routes/user');
 const sauceRoutes = require('./routes/sauce');
 
@@ -33,6 +37,7 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   next();
 });
+
 // rate limiter
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
@@ -44,6 +49,7 @@ const limiter = rateLimit({
 //middleware
 app.use(limiter)
 
+// utilisationde helmet et desactivation des option cross origin pour permettre l'appel des images 
 app.use(
   helmet({
     crossOriginResourcePolicy:false,
@@ -54,7 +60,7 @@ app.use(
 app.use(express.json());
 app.use('/images', express.static(path.join(__dirname, 'images')))
 
-//routes
+//utilisation des routes
 app.use('/api/sauces', sauceRoutes);
 app.use('/api/auth', userRoutes);
 
