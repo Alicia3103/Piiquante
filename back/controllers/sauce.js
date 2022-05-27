@@ -15,18 +15,9 @@ exports.getAllSauce = (req, res, next) => {
   //fonction création d'une sauce
 exports.createSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce)
+  sauceObject.imageUrl= req.protocol+"://"+req.headers.host +"/images/"+req.file.filename
     const sauce= new Sauce({
-      userId: sauceObject.userId,
-      name:sauceObject.name,
-      manufacturer:sauceObject.manufacturer,
-      description: sauceObject.description,
-      mainPepper: sauceObject.mainPepper,
-      imageUrl: req.protocol+"://"+req.headers.host +"/images/"+req.file.filename,
-      heat: sauceObject.heat,
-      likes: 0,
-      dislikes: 0,
-      usersLiked: [] ,
-      usersDisliked: [] ,
+      ...sauceObject,
     })
     sauce.save()
     .then(() => res.status(201).json({message:"Sauce enregistrée"}))

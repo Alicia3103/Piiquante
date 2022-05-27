@@ -41,7 +41,7 @@ app.use((req, res, next) => {
 // rate limiter
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 70, // Limite a 70 requet sur 15min
+	max: 100, // Limite a 100 requetes sur 15min
 	standardHeaders: true, // Retourne le rate limit dans le header `RateLimit-*` headers
 	legacyHeaders: false, // désactive le `X-RateLimit-*` des headers
 })
@@ -49,13 +49,10 @@ const limiter = rateLimit({
 //middleware
 app.use(limiter)
 
-// utilisationde helmet et desactivation des option cross origin pour permettre l'appel des images 
-app.use(
-  helmet({
-    crossOriginResourcePolicy:false,
-    crossOriginOpenerPolicy:false,
-  })
-)
+// utilisationde helmet et personalisation des option cross origin pour permettre l'appel des images 
+
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } },
+{ crossOriginOpenerPolicy: { policy: "cross-origin" } }))
 
 app.use(express.json());
 app.use('/images', express.static(path.join(__dirname, 'images')))

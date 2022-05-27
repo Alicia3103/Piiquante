@@ -16,14 +16,19 @@ const secretToken = process.env.SECRET_TOKEN
 exports.signup = (req, res, next) =>  {
 const email= req.body.email
 //hash et sallage du MDP grace a Bcrypt
-bcrypt.hash(req.body.password, 10)
+bcrypt.genSalt(parseInt(process.env.SALT))
+.then(salt=>{
+  bcrypt.hash(req.body.password,salt)
+
     .then(hash => {
+      
     const user =new User({email, password:hash})
     user
         .save()
         .then(() => res.status(201).send({ message: "Utilisateur enregistré !" }))
         .catch(error => res.status(409).send({ message: "Utilisateur pas enregistré :" + error }))
     })
+  })
 
 }
 
